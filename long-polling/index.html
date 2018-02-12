@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Long polling</title>
+  </head>
+  <body>
+    <p>Welcome to chat!</p>
+
+    <form id="form">
+      <input type="text" name="message">
+      <input type="submit" value="Send">
+    </form>
+
+    <ul id="messages"></ul>
+
+    <script>
+      form.onsubmit = function() {
+        const message = this.elements.message.value;
+
+        if (message) {
+          const xhr = new XMLHttpRequest();
+
+          xhr.open('POST', '/publish');
+          xhr.send(message);
+
+          this.elements.message.value = '';
+        }
+
+        return false;
+      }
+
+      subscribe();
+
+      function subscribe() {
+        const xhr = new XMLHttpRequest();
+
+        xhr.open('GET', '/subscribe');
+
+        xhr.onload = function() {
+          const li = document.createElement('li');
+
+          li.textContent = this.responseText;
+          messages.appendChild(li);
+
+          subscribe();
+        }
+
+        xhr.onerror = () => setTimeout(subscribe, 500);
+
+        xhr.send('');
+      }
+    </script>
+  </body>
+</html>
